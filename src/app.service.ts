@@ -132,9 +132,7 @@ export class AppService {
       method: 'post',
       url: 'https://api.sicoob.com.br/pix/api/v2/cob',
       headers: { 
-        'Content-Type': 'application/json',
-        // 'client_id': request.client_id,
-        // 'Authorization': 'Bearer ' + this.token
+        'Content-Type': 'application/json'
       },
       data : JSON.stringify(data),
       httpsAgent
@@ -159,8 +157,6 @@ export class AppService {
       method: 'get',
       url: 'https://api.sicoob.com.br/pix/api/v2/cob/' + request.txid,
       headers: { 
-        // 'client_id': request.client_id,
-        // 'Authorization': 'Bearer ' + this.token
       },
       httpsAgent
     };
