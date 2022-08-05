@@ -51,10 +51,12 @@ export class AppService {
     )
     .catch(e => {
         this.logger.error(e);
+        errorMessage = e.message;
         if(e?.response?.data?.detail){
           this.logger.error(e.response.data.detail);
+          errorMessage = `${errorMessage} - ${e.response.data.detail}`;
         }
-        errorMessage = e.message;
+        
         error = true;
     });
 
@@ -75,7 +77,7 @@ export class AppService {
     const data = qs.stringify({
       'grant_type': 'client_credentials',
       'client_id': request.client_id,
-      'scope': request.scope 
+      'scope': 'cob.read cob.write pix.read pix.write' 
     });
 
     const httpsAgent = this.createHttpsAgent(request);
@@ -110,7 +112,7 @@ export class AppService {
         
       },
       "valor": {
-        "original": request.value
+        "original": request.value.replace(',','.')
       },
       "chave": request.pixKey
     }

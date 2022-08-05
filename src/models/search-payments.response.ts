@@ -1,10 +1,7 @@
+import { PixResponse } from './pix.response';
 export class SearchPaymentsResponse {
 
-    public pix: {
-        txid: string;
-        value: string;
-        date: Date;
-    }[];
+    public pix: PixResponse[];
 
     public parameters: {
         start: Date;
@@ -21,11 +18,8 @@ export class SearchPaymentsResponse {
 
     createResponseFrompix(res: any) {
         this.pix = res?.pix?.map(x => {
-            const response = {
-                txid: x?.txid,
-                value: x?.valor,
-                date: x?.horario
-            };
+            const response = new PixResponse();
+            response.createFromSicoob(x);
             return response;
         });
 
