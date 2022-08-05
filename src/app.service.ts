@@ -1,3 +1,4 @@
+import { SearchPaymentsResponse } from './models/search-payments.response';
 import { GetCobRequest } from './models/get-cob.request';
 import { CobResponse } from './models/cob.response';
 import { BasicRequest } from './models/basic.request';
@@ -9,9 +10,9 @@ import {
 import * as qs from 'qs';
 import * as https from'https';
 import * as fs from 'fs';
-import * as jwt from 'jsonwebtoken';
 import { TokenRequest } from './models/token.request';
 import { HttpService } from '@nestjs/axios';
+import { SearchPaymentsRequest } from './models/search-payments.request';
 
 @Injectable()
 export class AppService {
@@ -170,6 +171,39 @@ export class AppService {
 
     return response;
 
+  }
+
+  async searchPayments(request: SearchPaymentsRequest) {
+    await this.checkToken(request);
+    const httpsAgent = this.createHttpsAgent(request);
+
+    const encodedStartDate = encodeURIComponent(new Date(request.start).toISOString());
+    const encodedEndDate = encodeURIComponent(new Date(request.end).toISOString());
+
+    let url = `https://api.sicoob.com.br/pix/api/v2/pix?inicio=${encodedStartDate}&fim=${encodedEndDate}&paginacao.paginaAtual=${request.page}&paginacao.itensPorPagina=${request.itensPerPage}&`;
+
+    if(request.cpf){
+      url = url + `cpf=${request.cpf}`;
+    }else if (request.cnpj){
+      url = url + `cnpj=${request.cnpj}`;
+    }
+
+    const config = {
+      method: 'get',
+      url,
+      headers: { 
+      },
+      httpsAgent
+    };
+
+    this.addAuthHeaders(config.headers, request);
+
+    const response = new SearchPaymentsResponse();
+    const res = await this.handleError(this.httpService.axiosRef(config));
+
+    response.createResponseFrompix(res);
+
+    return response;
   }
 
 }

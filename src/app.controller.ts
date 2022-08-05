@@ -1,3 +1,4 @@
+import { SearchPaymentsRequest } from './models/search-payments.request';
 import { GetCobRequest } from './models/get-cob.request';
 import { CreateCobRequest } from './models/create-cob.request';
 import { TokenRequest } from './models/token.request';
@@ -10,10 +11,10 @@ export class AppController {
 
   constructor(private readonly appService: AppService) {}
 
-  @Post('getCob')
-  async getCob(@Body() request: GetCobRequest, @Res() res: Response) {
+  @Post('searchPayments')
+  async searchPayments(@Body() request: SearchPaymentsRequest, @Res() res: Response) {
     try{
-      const response = await this.appService.getCob(request);
+      const response = await this.appService.searchPayments(request);
       res.status(HttpStatus.OK).json(response);
     }
     catch(ex) {
@@ -21,10 +22,10 @@ export class AppController {
     }
   }
 
-  @Post("token")
-  async getToken(@Body() request: TokenRequest, @Res() res: Response) {
+  @Post('getCob')
+  async getCob(@Body() request: GetCobRequest, @Res() res: Response) {
     try{
-      const response = await this.appService.getToken(request);
+      const response = await this.appService.getCob(request);
       res.status(HttpStatus.OK).json(response);
     }
     catch(ex) {
