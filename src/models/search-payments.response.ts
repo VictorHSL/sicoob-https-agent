@@ -16,10 +16,10 @@ export class SearchPaymentsResponse {
         }
     };
 
-    createResponseFrompix(res: any) {
+    createResponseFrompix(res: any, bank: string) {
         this.pix = res?.pix?.map(x => {
             const response = new PixResponse();
-            response.createFromSicoob(x);
+            response.create(x, bank);
             return response;
         });
 

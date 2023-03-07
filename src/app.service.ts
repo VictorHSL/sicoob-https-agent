@@ -72,7 +72,47 @@ export class AppService {
     headers.Authorization = 'Bearer ' + this.token.access_token;
   }
 
-  async getToken(request: TokenRequest): Promise<TokenResponse> {
+  private async getToken(request: TokenRequest): Promise<TokenResponse> {
+    switch(request.bank){
+      case 'SICOOB':
+        return this.getSicoobToken(request);
+      case 'BRADESCO':
+        return this.getBradescoToken(request);
+      default:
+        throw 'BANK ' + request.bank + ' NOT FOUND.';
+    }
+  }
+
+  async getBradescoToken(request: TokenRequest): Promise<TokenResponse> {
+
+    const data = qs.stringify({
+      'grant_type': 'client_credentials',
+      //'client_id': request.client_id,
+      'scope': 'cob.read cob.write pix.read pix.write' 
+    });
+
+    const httpsAgent = this.createHttpsAgent(request);
+
+    const config = {
+      method: 'post',
+      url: 'https://qrpix-h.bradesco.com.br/oauth/token',
+      headers: { 
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': 'Basic ZDZjZmM5NjUtOWY4YS00MTVlLWIzNmEtNjY4OGFhMzcyZjY5OjJiNTQzODlmLTUyYTEtNDUzOC04MTVkLTNjODY4NTc3ZmQ1OA=='
+      },
+      data : data,
+      httpsAgent
+    };
+
+    const response = new TokenResponse();
+    const res = await this.handleError(this.httpService.axiosRef(config));
+
+    response.createResponseFromBradesco(res);
+
+    return response;
+  }
+
+  async getSicoobToken(request: TokenRequest): Promise<TokenResponse> {
 
     const data = qs.stringify({
       'grant_type': 'client_credentials',
@@ -100,6 +140,39 @@ export class AppService {
     return response;
   }
 
+  private getCobUrl(bank: string){
+    switch(bank){
+      case 'SICOOB':
+        return 'https://api.sicoob.com.br/pix/api/v2/cob';
+      case 'BRADESCO':
+        return 'https://qrpix-h.bradesco.com.br/v2/cob';
+      default:
+        throw 'BANK ' + bank + ' NOT FOUND.';
+    }
+  }
+
+  private getCobSearchUrl(bank: string){
+    switch(bank){
+      case 'SICOOB':
+        return 'https://api.sicoob.com.br/pix/api/v2/cob/';
+      case 'BRADESCO':
+        return 'https://qrpix-h.bradesco.com.br/v2/cob/';
+      default:
+        throw 'BANK ' + bank + ' NOT FOUND.';
+    }
+  }
+
+  private getCobReportUrl(bank: string){
+    switch(bank){
+      case 'SICOOB':
+        return 'https://api.sicoob.com.br/pix/api/v2/cob/';
+      case 'BRADESCO':
+        return 'https://qrpix-h.bradesco.com.br/v2/cob/';
+      default:
+        throw 'BANK ' + bank + ' NOT FOUND.';
+    }
+  }
+
   async createCob(request: CreateCobRequest) {
 
     await this.checkToken(request);
@@ -108,9 +181,7 @@ export class AppService {
       "calendario": {
         "expiracao": 3600
       },
-      "devedor": {
-        
-      },
+      "devedor": {},
       "valor": {
         "original": request.value.replace(',','.')
       },
@@ -133,7 +204,7 @@ export class AppService {
 
     const config = {
       method: 'post',
-      url: 'https://api.sicoob.com.br/pix/api/v2/cob',
+      url: this.getCobUrl(request.bank),
       headers: { 
         'Content-Type': 'application/json'
       },
@@ -146,7 +217,7 @@ export class AppService {
     const res = await this.handleError(this.httpService.axiosRef(config));
 
     const response = new CobResponse();
-    response.createResponseFromSicoob(res);
+    response.createResponse(res, request.bank);
 
     return response;
   }
@@ -158,7 +229,7 @@ export class AppService {
 
     const config = {
       method: 'get',
-      url: 'https://api.sicoob.com.br/pix/api/v2/cob/' + request.txid,
+      url: this.getCobSearchUrl(request.bank) + request.txid,
       headers: { 
       },
       httpsAgent
@@ -169,7 +240,7 @@ export class AppService {
     const response = new CobResponse();
     const res = await this.handleError(this.httpService.axiosRef(config));
 
-    response.createResponseFromSicoob(res);
+    response.createResponse(res, request.bank);
 
     return response;
 
@@ -182,7 +253,7 @@ export class AppService {
     const encodedStartDate = encodeURIComponent(new Date(request.start).toISOString());
     const encodedEndDate = encodeURIComponent(new Date(request.end).toISOString());
 
-    let url = `https://api.sicoob.com.br/pix/api/v2/pix?inicio=${encodedStartDate}&fim=${encodedEndDate}&paginacao.paginaAtual=${request.page}&paginacao.itensPorPagina=${request.itensPerPage}&`;
+    let url = `${this.getCobReportUrl(request.bank)}?inicio=${encodedStartDate}&fim=${encodedEndDate}&paginacao.paginaAtual=${request.page}&paginacao.itensPorPagina=${request.itensPerPage}&`;
 
     if(request.cpf){
       url = url + `cpf=${request.cpf}`;
@@ -203,7 +274,7 @@ export class AppService {
     const response = new SearchPaymentsResponse();
     const res = await this.handleError(this.httpService.axiosRef(config));
 
-    response.createResponseFrompix(res);
+    response.createResponseFrompix(res, request.bank);
 
     return response;
   }
