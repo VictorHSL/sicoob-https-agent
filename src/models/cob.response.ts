@@ -25,7 +25,7 @@ export class CobResponse {
     }
 
     private createResponseFromBradesco(res: any) {
-        this.brcode = res.brcode;
+        this.brcode = res.pixCopiaECola;
         this.txid = res.txid;
         this.cnpj = res.devedor.cnpj;
         this.cpf = res.devedor.cpf;

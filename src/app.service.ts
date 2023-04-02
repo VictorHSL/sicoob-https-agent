@@ -13,6 +13,7 @@ import * as fs from 'fs';
 import { TokenRequest } from './models/token.request';
 import { HttpService } from '@nestjs/axios';
 import { SearchPaymentsRequest } from './models/search-payments.request';
+import { Buffer } from 'buffer';
 
 @Injectable()
 export class AppService {
@@ -68,7 +69,11 @@ export class AppService {
   }
 
   private addAuthHeaders(headers: any, request: BasicRequest) {
-    headers.client_id = request.client_id;
+    
+    if(request.bank == 'SICOOB'){
+      headers.client_id = request.client_id;
+    }
+
     headers.Authorization = 'Bearer ' + this.token.access_token;
   }
 
@@ -87,9 +92,12 @@ export class AppService {
 
     const data = qs.stringify({
       'grant_type': 'client_credentials',
-      //'client_id': request.client_id,
       'scope': 'cob.read cob.write pix.read pix.write' 
     });
+
+    const buffer = Buffer.from(`${request.client_id}:${request.client_secret}`, 'utf-8');
+
+    const base64String = buffer.toString('base64')
 
     const httpsAgent = this.createHttpsAgent(request);
 
@@ -98,7 +106,7 @@ export class AppService {
       url: 'https://qrpix-h.bradesco.com.br/oauth/token',
       headers: { 
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Basic ZDZjZmM5NjUtOWY4YS00MTVlLWIzNmEtNjY4OGFhMzcyZjY5OjJiNTQzODlmLTUyYTEtNDUzOC04MTVkLTNjODY4NTc3ZmQ1OA=='
+        'Authorization': `Basic ${base64String}`
       },
       data : data,
       httpsAgent
