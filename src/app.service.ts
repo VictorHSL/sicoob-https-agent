@@ -103,7 +103,7 @@ export class AppService {
 
     const config = {
       method: 'post',
-      url: 'https://qrpix-h.bradesco.com.br/oauth/token',
+      url: 'https://qrpix.bradesco.com.br/oauth/token',
       headers: { 
         'Content-Type': 'application/x-www-form-urlencoded',
         'Authorization': `Basic ${base64String}`
@@ -153,7 +153,7 @@ export class AppService {
       case 'SICOOB':
         return 'https://api.sicoob.com.br/pix/api/v2/cob';
       case 'BRADESCO':
-        return 'https://qrpix-h.bradesco.com.br/v2/cob';
+        return 'https://qrpix.bradesco.com.br/v2/cob';
       default:
         throw 'BANK ' + bank + ' NOT FOUND.';
     }
@@ -164,7 +164,7 @@ export class AppService {
       case 'SICOOB':
         return 'https://api.sicoob.com.br/pix/api/v2/cob/';
       case 'BRADESCO':
-        return 'https://qrpix-h.bradesco.com.br/v2/cob/';
+        return 'https://qrpix.bradesco.com.br/v2/cob/';
       default:
         throw 'BANK ' + bank + ' NOT FOUND.';
     }
@@ -173,9 +173,9 @@ export class AppService {
   private getCobReportUrl(bank: string){
     switch(bank){
       case 'SICOOB':
-        return 'https://api.sicoob.com.br/pix/api/v2/cob/';
+        return 'https://api.sicoob.com.br/pix/api/v2/cob';
       case 'BRADESCO':
-        return 'https://qrpix-h.bradesco.com.br/v2/cob/';
+        return 'https://qrpix.bradesco.com.br/v2/cob';
       default:
         throw 'BANK ' + bank + ' NOT FOUND.';
     }

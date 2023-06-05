@@ -17,11 +17,21 @@ export class SearchPaymentsResponse {
     };
 
     createResponseFrompix(res: any, bank: string) {
-        this.pix = res?.pix?.map(x => {
+        let items = [];
+
+        if(res?.cobs){
+            items = res?.cobs;
+        }
+        else {
+            items = res?.pix;
+        }
+
+        this.pix = items?.map(x => {
             const response = new PixResponse();
             response.create(x, bank);
             return response;
-        });
+        }) ?? [];
+        this.pix = this.pix ?? [];
 
         this.parameters = {
             start: res?.parametros?.inicio,

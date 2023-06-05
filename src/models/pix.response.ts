@@ -15,7 +15,7 @@ export class PixResponse {
     private createFromBradesco(res: any) {
         this.txid = res.txid ?? this.endToEndId;
         this.value = res.valor?.original ?? res.valor;
-        this.date = res.horario;
+        this.date = res.pix?.horario ?? new Date().toISOString();
         this.endToEndId = res.location ?? res.txid;
     }
 
